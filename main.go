@@ -4,9 +4,12 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
+
+	"bookstore/handler"
 
 	"github.com/gorilla/mux"
-	"github.com/adipeka/bookstore/handler"
+	_ "github.com/lib/pq"
 )
 
 const (
@@ -19,6 +22,8 @@ const (
 
 func main() {
 
+	fmt.Println("Starting the server")
+
 	connectionstring := fmt.Sprintf("user=%s dbname=%s port=%s password=%s sslmode=disable", dbuser, dbname, dbport, dbpassword)
 	db, err := sql.Open("postgres", connectionstring)
 
@@ -28,6 +33,10 @@ func main() {
 
 	router := mux.NewRouter()
 
-	hr := handler.New(db,router)
+	hr := handler.New(db, router)
+
+	router.HandleFunc("/book", hr.GetBook).Methods("GET")
+
+	http.ListenAndServe(":8001", router)
 
 }
